@@ -53,11 +53,18 @@ const EMOTIONS = [
   { name: '불안한', card: '#d7c4ec', blob: '#eee3f9', shape: '55% 45% 35% 65%' },
 ];
 
+// pedestal: 받침대 색 필터, pedestalImg: 받침대 이미지(기본 노란색), bg: 로딩·피드백 화면 배경색
 const CHARACTERS = [
-  { id: 'hamster', name: '다이아 골든 햄스터', img: 'char-hamster.png', traits: [3, 4, 1], grad: ['#bb9b35', '#554618'], hue: 0, dot: '#ffc21a' },
-  { id: 'bird', name: '사과 코끼리', img: 'char-bird.png', traits: [5, 2, 3], grad: ['#6f9be0', '#2f4f8a'], hue: 175, dot: '#5b8ff0' },
-  { id: 'sprout', name: '새싹 뭉실양', img: 'char-sprout.png', traits: [4, 3, 2], grad: ['#8fb35a', '#41562a'], hue: 55, dot: '#9ed85a' },
-  { id: 'pig', name: '소세지 돼지', img: 'char-pig.png', traits: [2, 1, 5], grad: ['#e88aa5', '#8a3d55'], hue: -45, dot: '#f58fb3' },
+  { id: 'hamster', name: '다이아 골든 햄스터', img: 'char-hamster.png', traits: [3, 4, 1], grad: ['#bb9b35', '#554618'], dot: '#ffc21a',
+    pedestal: 'none', bg: ['#ffd66e', '#ffe7a8', '#fff8df'] },
+  { id: 'bird', name: '사과 코끼리', img: 'char-bird.png', traits: [5, 2, 3], grad: ['#6f9be0', '#2f4f8a'], dot: '#5b8ff0',
+    pedestal: 'hue-rotate(175deg)', bg: ['#93bdf5', '#c3dbfa', '#edf5fe'] },
+  { id: 'sprout', name: '새싹 뭉실양', img: 'char-sprout.png', traits: [4, 3, 2], grad: ['#8fb35a', '#41562a'], dot: '#9ed85a',
+    pedestal: 'hue-rotate(55deg)', bg: ['#a5da98', '#cbecc3', '#eff9ea'] },
+  { id: 'pig', name: '소세지 돼지', img: 'char-pig.png', traits: [2, 1, 5], grad: ['#e88aa5', '#8a3d55'], dot: '#f58fb3',
+    pedestal: 'hue-rotate(-45deg)', bg: ['#f7a6c3', '#fbcde0', '#fff0f6'] },
+  { id: 'lion', name: '초코별 사자', img: 'char-lion.png', traits: [4, 2, 4], grad: ['#8a6656', '#3d2a22'], dot: '#7b4a33',
+    pedestal: 'saturate(0.6) brightness(0.6)', pedestalImg: 'pedestal-orange.png', bg: ['#bf9278', '#dcc0ab', '#f5ebe2'] },
 ];
 
 const BUBBLES = [
@@ -107,11 +114,14 @@ function showScene(name) {
   document.querySelectorAll('.scene').forEach((s) => s.classList.toggle('active', s.dataset.scene === name));
 }
 
-function setMoodColors(i) {
-  const [c0, c1, c2] = MOODS[i].colors;
+function setPalette([c0, c1, c2]) {
   stage.style.setProperty('--c0', c0);
   stage.style.setProperty('--c1', c1);
   stage.style.setProperty('--c2', c2);
+}
+
+function setMoodColors(i) {
+  setPalette(MOODS[i].colors);
   stage.style.setProperty('--t0', MOODS[i].text[0]);
   stage.style.setProperty('--t1', MOODS[i].text[1]);
 }
@@ -593,6 +603,11 @@ messageInput.addEventListener('input', () => {
 /* =========================================================
    10. 캐릭터 선택
    ========================================================= */
+function setPedestal(img, c) {
+  img.src = `assets/${c.pedestalImg || 'pedestal-yellow.png'}`;
+  img.style.filter = c.pedestal;
+}
+
 function applyCharacter(delta) {
   state.character = (state.character + delta + CHARACTERS.length) % CHARACTERS.length;
   const c = CHARACTERS[state.character];
@@ -602,7 +617,7 @@ function applyCharacter(delta) {
     big.src = `assets/${c.img}`;
     big.classList.remove('changing');
   }, delta ? 200 : 0);
-  $('#charPedestal').style.filter = `hue-rotate(${c.hue}deg)`;
+  setPedestal($('#charPedestal'), c);
 
   const mini = $('#charMini');
   if (!mini) return;
@@ -632,6 +647,7 @@ function startLoading() {
   stepPanel.classList.remove('show');
   $('#loadingChar').src = `assets/${c.img}`;
   $('#loadingText').textContent = `${c.name}${josa(c.name, '이', '가')} 피드백을 쓰고 있어요`;
+  setPalette(c.bg); // 로딩·피드백 화면은 캐릭터 색 배경
   showScene('loading');
   setTimeout(showResult, 2600);
 }
@@ -677,6 +693,11 @@ function buildFeedback() {
       { low: '기분 나쁜 날엔 맛있는 거 먹고 꿀잠 자는 게 최고야. 내가 보증할게!', mid: '평범한 날? 그럼 내가 오늘을 재밌게 만들어주지! 꿀꿀~', high: '와아~ 그 기분 나한테도 나눠줘! 같이 데굴데굴 구르자!' }[tone],
       shortMsg ? `"${shortMsg}"? 부끄러워하지 말고 크게 외쳐봐! 부모님이 깜짝 놀라실걸?` : '하고 싶은 말이 없다고? 그럼 "사랑해요!" 어때? 히히.',
     ],
+    lion: [
+      `어흥~ 초코별에서 다 보고 있었어! ${moment}, ${emo} 마음이 ${level} 반짝였네.`,
+      { low: '힘든 날엔 사자도 꼬리를 내리고 쉬어. 오늘은 푹 쉬고, 내일 다시 기운 내자!', mid: '별일 없는 하루도 반짝이는 별 하나쯤은 숨어 있어. 같이 찾아볼래?', high: '이렇게 좋은 기분이라니, 내 갈기까지 신나서 들썩거려! 어흥!' }[tone],
+      shortMsg ? `"${shortMsg}" — 용기 내서 말해봐. 사자처럼 당당하게, 대신 다정하게!` : '말이 안 떠올라도 괜찮아. 꼭 안아드리는 것도 멋진 대답이야.',
+    ],
   };
   return T[c.id].join(' ');
 }
@@ -684,7 +705,7 @@ function buildFeedback() {
 function showResult() {
   const c = CHARACTERS[state.character];
   $('#resultChar').src = `assets/${c.img}`;
-  $('#resultPedestal').style.filter = `hue-rotate(${c.hue}deg)`;
+  setPedestal($('#resultPedestal'), c);
   const from = $('#feedbackFrom');
   from.textContent = `${c.name}의 피드백`;
   from.style.color = c.grad[1];
@@ -698,7 +719,7 @@ function showResult() {
     <dt>감정 크기</dt><dd><div class="bar"><i style="width:${state.juice}%"></i></div></dd>
     <dt>하고 싶은 말</dt><dd class="quote">${msg ? esc(msg) : '<span style="color:#b3a399">(적지 않았어요)</span>'}</dd>`;
 
-  setMoodColors(2); // 결과 화면은 기본 주황색 배경
+  setPalette(c.bg);
   showScene('result');
   typeText($('#feedbackText'), buildFeedback());
 }
