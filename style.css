@@ -2,6 +2,8 @@
 @property --c0 { syntax: '<color>'; inherits: true; initial-value: #ffbc89; }
 @property --c1 { syntax: '<color>'; inherits: true; initial-value: #ffd8b3; }
 @property --c2 { syntax: '<color>'; inherits: true; initial-value: #fff3dd; }
+@property --t0 { syntax: '<color>'; inherits: true; initial-value: #3b2a20; }
+@property --t1 { syntax: '<color>'; inherits: true; initial-value: #c0702e; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,7 +32,9 @@ button { font-family: inherit; border: 0; cursor: pointer; background: none; }
   --c0: #ffbc89;
   --c1: #ffd8b3;
   --c2: #fff3dd;
-  transition: --c0 0.8s ease, --c1 0.8s ease, --c2 0.8s ease;
+  --t0: #3b2a20;
+  --t1: #c0702e;
+  transition: --c0 0.8s ease, --c1 0.8s ease, --c2 0.8s ease, --t0 0.8s ease, --t1 0.8s ease;
 }
 
 .bg {
@@ -287,8 +291,9 @@ button { font-family: inherit; border: 0; cursor: pointer; background: none; }
   height: 260px;
   margin: -130px 0 0 -130px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, #fff4ea 45%, #ffd9bb 100%);
-  box-shadow: 0 0 40px rgba(255, 190, 140, 0.55);
+  /* 원 색상은 기분 배경색(--c0~--c2)을 따라감 */
+  background: radial-gradient(circle, #fff 0%, var(--c2) 45%, var(--c1) 100%);
+  box-shadow: 0 0 40px var(--c0);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -300,7 +305,7 @@ button { font-family: inherit; border: 0; cursor: pointer; background: none; }
   padding: 20px;
 }
 .mood-word span {
-  background: linear-gradient(90deg, #3b2a20 30%, #c0702e);
+  background: linear-gradient(90deg, var(--t0) 30%, var(--t1));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -662,7 +667,7 @@ button { font-family: inherit; border: 0; cursor: pointer; background: none; }
 .trait { position: absolute; left: 283px; display: flex; align-items: center; font-size: 21.7px; font-weight: 500; color: #646464; }
 .trait span { width: 108px; }
 .trait i { width: 16.7px; height: 16.7px; border-radius: 50%; background: #d9d9d9; margin-right: 13.8px; }
-.trait i.on { background: #ffc21a; }
+.trait i.on { background: var(--dot, #ffc21a); }
 
 /* ===== 로딩 ===== */
 .loading {

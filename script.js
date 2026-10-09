@@ -27,11 +27,11 @@ function capture(el, e) {
 
 /* ---------- 데이터 ---------- */
 const MOODS = [
-  { label: '매우 좋지 않음', img: 'mood-1.png', colors: ['#ff9b9b', '#ffc4c0', '#ffeae6'] },
-  { label: '좋지 않음', img: 'mood-2.png', colors: ['#ffa985', '#ffcdb3', '#fff0e3'] },
-  { label: '보통', img: 'mood-3.png', colors: ['#ffbc89', '#ffd8b3', '#fff3dd'] },
-  { label: '좋음', img: 'mood-4.png', colors: ['#ffd27a', '#ffe6ad', '#fff8e0'] },
-  { label: '매우 좋음', img: 'mood-5.png', colors: ['#9fdcaa', '#c9ebc9', '#eff9ea'] },
+  { label: '매우 좋지 않음', img: 'mood-1.png', colors: ['#ff9b9b', '#ffc4c0', '#ffeae6'], text: ['#4a2222', '#d0504f'] },
+  { label: '좋지 않음', img: 'mood-2.png', colors: ['#ffa985', '#ffcdb3', '#fff0e3'], text: ['#3f2618', '#d0683a'] },
+  { label: '보통', img: 'mood-3.png', colors: ['#ffbc89', '#ffd8b3', '#fff3dd'], text: ['#3b2a20', '#c0702e'] },
+  { label: '좋음', img: 'mood-4.png', colors: ['#ffd27a', '#ffe6ad', '#fff8e0'], text: ['#3e3016', '#c59a1e'] },
+  { label: '매우 좋음', img: 'mood-5.png', colors: ['#9fdcaa', '#c9ebc9', '#eff9ea'], text: ['#1f3a24', '#4f9d5c'] },
 ];
 
 const CHIP_SETS = {
@@ -54,10 +54,10 @@ const EMOTIONS = [
 ];
 
 const CHARACTERS = [
-  { id: 'hamster', name: '다이아 골든 햄스터', img: 'char-hamster.png', traits: [3, 4, 1], grad: ['#bb9b35', '#554618'], hue: 0 },
-  { id: 'bird', name: '하늘 구름새', img: 'char-bird.png', traits: [5, 2, 3], grad: ['#6f9be0', '#2f4f8a'], hue: 175 },
-  { id: 'sprout', name: '새싹 뭉게', img: 'char-sprout.png', traits: [4, 3, 2], grad: ['#8fb35a', '#41562a'], hue: 55 },
-  { id: 'pig', name: '말랑 핑크돼지', img: 'char-pig.png', traits: [2, 1, 5], grad: ['#e88aa5', '#8a3d55'], hue: -45 },
+  { id: 'hamster', name: '다이아 골든 햄스터', img: 'char-hamster.png', traits: [3, 4, 1], grad: ['#bb9b35', '#554618'], hue: 0, dot: '#ffc21a' },
+  { id: 'bird', name: '사과 코끼리', img: 'char-bird.png', traits: [5, 2, 3], grad: ['#6f9be0', '#2f4f8a'], hue: 175, dot: '#5b8ff0' },
+  { id: 'sprout', name: '새싹 뭉실양', img: 'char-sprout.png', traits: [4, 3, 2], grad: ['#8fb35a', '#41562a'], hue: 55, dot: '#9ed85a' },
+  { id: 'pig', name: '소세지 돼지', img: 'char-pig.png', traits: [2, 1, 5], grad: ['#e88aa5', '#8a3d55'], hue: -45, dot: '#f58fb3' },
 ];
 
 const BUBBLES = [
@@ -112,6 +112,8 @@ function setMoodColors(i) {
   stage.style.setProperty('--c0', c0);
   stage.style.setProperty('--c1', c1);
   stage.style.setProperty('--c2', c2);
+  stage.style.setProperty('--t0', MOODS[i].text[0]);
+  stage.style.setProperty('--t1', MOODS[i].text[1]);
 }
 
 function goStep(i) {
@@ -614,6 +616,7 @@ function applyCharacter(delta) {
     for (let k = 0; k < 5; k++) {
       const dot = document.createElement('i');
       if (k < c.traits[r]) dot.className = 'on';
+      dot.style.setProperty('--dot', c.dot);
       row.appendChild(dot);
     }
   });
@@ -695,7 +698,7 @@ function showResult() {
     <dt>감정 크기</dt><dd><div class="bar"><i style="width:${state.juice}%"></i></div></dd>
     <dt>하고 싶은 말</dt><dd class="quote">${msg ? esc(msg) : '<span style="color:#b3a399">(적지 않았어요)</span>'}</dd>`;
 
-  setMoodColors(state.mood);
+  setMoodColors(2); // 결과 화면은 기본 주황색 배경
   showScene('result');
   typeText($('#feedbackText'), buildFeedback());
 }
