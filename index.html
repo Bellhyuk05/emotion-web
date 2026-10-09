@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>이 순간의 감정</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="stage" class="stage">
+    <!-- 배경 그라데이션 (기분에 따라 색상 변경) -->
+    <div class="bg"></div>
+
+    <!-- ========== 시작 화면 ========== -->
+    <section class="scene active" data-scene="start">
+      <div class="start-bg"><img src="assets/start-bg.jpg" alt="" /></div>
+      <div class="bubble" id="startBubble"><span>그러니까... 네 순간은....</span></div>
+      <div class="panel start-panel">
+        <h1 class="title">부모님께 이 순간의<br />감정을 전해보자!</h1>
+        <p class="sub">실제로 전해지진 않아요.</p>
+        <button class="btn btn-primary btn-start" id="startBtn">시작하기</button>
+      </div>
+    </section>
+
+    <!-- ========== 1. 기분 슬라이더 ========== -->
+    <section class="scene" data-scene="mood">
+      <div class="mood-object" id="moodObject">
+        <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
+        <img id="moodImg" src="assets/mood-3.png" alt="" />
+      </div>
+      <div class="slider" id="moodSlider">
+        <div class="slider-knob" id="moodKnob"></div>
+      </div>
+      <span class="slider-label left">매우 좋지 않음</span>
+      <span class="slider-label right">매우 좋음</span>
+    </section>
+
+    <!-- ========== 2~4. 칩 선택 (활동/장소/사람) ========== -->
+    <section class="scene" data-scene="chips">
+      <p class="chip-question" id="chipQuestion">무엇을 하고 있었나요?</p>
+      <div class="chip-list" id="chipList"></div>
+    </section>
+
+    <!-- ========== 5. 확인 (왼쪽 비어 있음) ========== -->
+    <section class="scene" data-scene="empty"></section>
+
+    <!-- ========== 6. 감정 카드 ========== -->
+    <section class="scene" data-scene="cards">
+      <div class="card-fan" id="cardFan"></div>
+      <div class="dial" id="dial">
+        <span class="dial-dot" id="dialDot"></span>
+      </div>
+    </section>
+
+    <!-- ========== 7. 주스 잔 채우기 ========== -->
+    <section class="scene" data-scene="juice">
+      <img class="pedestal pedestal-juice" src="assets/pedestal-orange.png" alt="" />
+      <div class="glass" id="glass">
+        <svg class="juice" viewBox="0 0 416.316 624.569" preserveAspectRatio="none">
+          <defs>
+            <clipPath id="glassClip">
+              <path d="M8.94489 192.881C-7.25514 120.219 2.19487 34.018 8.94489 0H409.769C410.522 26.1933 412.843 89.6019 416.101 133.689C420.174 188.798 365.193 391.886 353.993 430.666C345.033 461.69 346.187 551.09 347.884 591.911C350.599 602.797 327.927 624.569 215.521 624.569C103.115 624.569 66.1888 602.797 61.7767 591.911C75.013 477.611 29.1949 283.708 8.94489 192.881Z" />
+            </clipPath>
+            <linearGradient id="juiceGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FF5727" />
+              <stop offset="1" stop-color="#FFB95D" />
+            </linearGradient>
+          </defs>
+          <g clip-path="url(#glassClip)">
+            <g id="juiceLevel">
+              <path id="juiceWave" fill="url(#juiceGrad)" fill-opacity="0.78" d="" />
+            </g>
+          </g>
+        </svg>
+        <img class="glass-img" src="assets/glass-frame.png" alt="" />
+      </div>
+    </section>
+
+    <!-- ========== 8. 원 그리기 ========== -->
+    <section class="scene" data-scene="draw">
+      <div class="draw-guide" id="drawGuide">
+        <div class="draw-ring"></div>
+        <div class="draw-glow"></div>
+        <span class="draw-good">Good!</span>
+      </div>
+      <canvas id="drawCanvas" width="1100" height="1080"></canvas>
+      <p class="draw-toast" id="drawToast">조금만 더 동그랗게 그려볼까?</p>
+    </section>
+
+    <!-- ========== 9. 하고 싶은 말 ========== -->
+    <section class="scene" data-scene="message">
+      <textarea id="messageInput" class="message-box" maxlength="200" placeholder="떠오르는 생각을 적어주세요."></textarea>
+      <span class="message-count" id="messageCount">0 / 200</span>
+    </section>
+
+    <!-- ========== 10. 캐릭터 선택 ========== -->
+    <section class="scene" data-scene="character">
+      <img class="pedestal pedestal-char" id="charPedestal" src="assets/pedestal-yellow.png" alt="" />
+      <img class="char-big" id="charBig" src="assets/char-hamster.png" alt="" />
+      <button class="arrow arrow-left" id="charPrev" aria-label="이전 캐릭터"><img src="assets/arrow-left.svg" alt="" /></button>
+      <button class="arrow arrow-right" id="charNext" aria-label="다음 캐릭터"><img src="assets/arrow-right.svg" alt="" /></button>
+    </section>
+
+    <!-- ========== 공용 오른쪽 패널 (1~10단계) ========== -->
+    <div class="panel step-panel" id="stepPanel">
+      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+      <h2 class="title" id="stepTitle"></h2>
+      <p class="sub" id="stepSub"></p>
+      <div class="panel-body" id="panelBody"></div>
+      <button class="btn btn-prev" id="prevBtn">이전</button>
+      <button class="btn btn-primary btn-next" id="nextBtn">다음 단계</button>
+    </div>
+
+    <!-- ========== 로딩 ========== -->
+    <section class="scene" data-scene="loading">
+      <div class="loading">
+        <img id="loadingChar" src="assets/char-hamster.png" alt="" />
+        <div class="loading-shadow"></div>
+        <p id="loadingText">피드백을 쓰고 있어요</p>
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+      </div>
+    </section>
+
+    <!-- ========== 결과 ========== -->
+    <section class="scene" data-scene="result">
+      <div class="feedback-bubble" id="feedbackBubble">
+        <p class="feedback-from" id="feedbackFrom"></p>
+        <p class="feedback-text" id="feedbackText"></p>
+      </div>
+      <img class="pedestal pedestal-result" id="resultPedestal" src="assets/pedestal-yellow.png" alt="" />
+      <img class="char-result" id="resultChar" src="assets/char-hamster.png" alt="" />
+
+      <div class="panel result-panel">
+        <h2 class="title">오늘의 순간이<br />기록됐어!</h2>
+        <p class="sub">부모님께 전하고 싶은 이 순간의 감정이에요.</p>
+        <dl class="summary" id="summary"></dl>
+        <button class="btn btn-prev" id="resultPrev">이전</button>
+        <button class="btn btn-primary btn-next" id="restartBtn">처음으로</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
