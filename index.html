@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>이 순간의 감정</title>
+  <title>오늘우리</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div id="stage" class="stage">
-    <!-- 배경 그라데이션 (기분에 따라 색상 변경) -->
+    <!-- 배경 그라데이션 (기분·캐릭터에 따라 색상 변경) -->
     <div class="bg"></div>
 
     <!-- ========== 시작 화면 ========== -->
@@ -17,45 +17,48 @@
       <div class="start-bg"><img src="assets/start-bg.jpg" alt="" /></div>
       <div class="bubble" id="startBubble"><span>그러니까... 네 순간은....</span></div>
       <div class="panel start-panel">
-        <h1 class="title">부모님께 이 순간의<br />감정을 전해보자!</h1>
-        <p class="sub">실제로 전해지진 않아요.</p>
+        <img class="logo" src="assets/logo.png" alt="오늘우리" />
+        <h1 class="start-title">부모님께 이 순간의<br />감정을 전해보자!</h1>
+        <p class="start-sub">실제로 전해지진 않아요.</p>
+        <button class="btn btn-records" id="recordsBtn">기록보기</button>
         <button class="btn btn-primary btn-start" id="startBtn">시작하기</button>
       </div>
     </section>
 
-    <!-- ========== 1. 기분 슬라이더 ========== -->
+    <!-- ========== 1. 기분 ========== -->
     <section class="scene" data-scene="mood">
-      <div class="mood-object" id="moodObject">
+      <p class="mood-word" id="moodWord"><span>보통</span></p>
+      <div class="mood-object">
         <span class="ripple"></span><span class="ripple"></span><span class="ripple"></span>
         <img id="moodImg" src="assets/mood-3.png" alt="" />
       </div>
+      <span class="slider-label left">매우 좋지 않음</span>
+      <span class="slider-label right">매우 좋음</span>
       <div class="slider" id="moodSlider">
         <div class="slider-knob" id="moodKnob"></div>
       </div>
-      <span class="slider-label left">매우 좋지 않음</span>
-      <span class="slider-label right">매우 좋음</span>
     </section>
 
-    <!-- ========== 2~4. 칩 선택 (활동/장소/사람) ========== -->
+    <!-- ========== 2~4. 무엇을 / 어디서 / 누구와 ========== -->
     <section class="scene" data-scene="chips">
-      <p class="chip-question" id="chipQuestion">무엇을 하고 있었나요?</p>
+      <p class="chip-question" id="chipQuestion">무엇을 하고 있었어?</p>
       <div class="chip-list" id="chipList"></div>
     </section>
 
-    <!-- ========== 5. 확인 (왼쪽 비어 있음) ========== -->
-    <section class="scene" data-scene="empty"></section>
+    <!-- ========== 5. 확인 ========== -->
+    <section class="scene" data-scene="confirm">
+      <div class="confirm-list" id="confirmList"></div>
+    </section>
 
     <!-- ========== 6. 감정 카드 ========== -->
     <section class="scene" data-scene="cards">
-      <div class="card-fan" id="cardFan"></div>
-      <div class="dial" id="dial">
-        <span class="dial-dot" id="dialDot"></span>
-      </div>
+      <p class="emotion-pill" id="emotionPill">무난한</p>
+      <div class="card-orbit" id="cardOrbit"></div>
     </section>
 
-    <!-- ========== 7. 주스 잔 채우기 ========== -->
+    <!-- ========== 7. 잔 채우기 ========== -->
     <section class="scene" data-scene="juice">
-      <img class="pedestal pedestal-juice" src="assets/pedestal-orange.png" alt="" />
+      <img class="table" src="assets/table.jpg" alt="" />
       <div class="glass" id="glass">
         <svg class="juice" viewBox="0 0 416.316 624.569" preserveAspectRatio="none">
           <defs>
@@ -68,77 +71,95 @@
             </linearGradient>
           </defs>
           <g clip-path="url(#glassClip)">
-            <g id="juiceLevel">
-              <path id="juiceWave" fill="url(#juiceGrad)" fill-opacity="0.78" d="" />
-            </g>
+            <path id="juiceWave" fill="url(#juiceGrad)" fill-opacity="0.8" d="" />
           </g>
         </svg>
         <img class="glass-img" src="assets/glass-frame.png" alt="" />
+      </div>
+      <div class="juice-meter">
+        <strong id="juicePct">0%</strong>
+        <span>만큼 채웠어요</span>
       </div>
     </section>
 
     <!-- ========== 8. 원 그리기 ========== -->
     <section class="scene" data-scene="draw">
       <div class="draw-guide" id="drawGuide">
+        <div class="draw-dash"></div>
         <div class="draw-ring"></div>
         <div class="draw-glow"></div>
         <span class="draw-good">Good!</span>
       </div>
-      <canvas id="drawCanvas" width="1100" height="1080"></canvas>
-      <p class="draw-toast" id="drawToast">조금만 더 동그랗게 그려볼까?</p>
+      <canvas id="drawCanvas" width="1700" height="1064"></canvas>
+      <p class="toast" id="drawToast">조금만 더 동그랗게 그려볼까?</p>
     </section>
 
-    <!-- ========== 9. 하고 싶은 말 ========== -->
-    <section class="scene" data-scene="message">
-      <textarea id="messageInput" class="message-box" maxlength="200" placeholder="떠오르는 생각을 적어주세요."></textarea>
-      <span class="message-count" id="messageCount">0 / 200</span>
-    </section>
-
-    <!-- ========== 10. 캐릭터 선택 ========== -->
+    <!-- ========== 9. 캐릭터 선택 ========== -->
     <section class="scene" data-scene="character">
-      <img class="pedestal pedestal-char" id="charPedestal" src="assets/pedestal-yellow.png" alt="" />
+      <img class="pedestal pedestal-char" id="charPedestal" src="assets/ped-hamster.png" alt="" />
       <img class="char-big" id="charBig" src="assets/char-hamster.png" alt="" />
-      <button class="arrow arrow-left" id="charPrev" aria-label="이전 캐릭터"><img src="assets/arrow-left.svg" alt="" /></button>
-      <button class="arrow arrow-right" id="charNext" aria-label="다음 캐릭터"><img src="assets/arrow-right.svg" alt="" /></button>
+      <button class="arrow arrow-left" id="charPrev" aria-label="이전 캐릭터">
+        <svg viewBox="0 0 24 24"><path d="M15 4 7 12l8 8" /></svg>
+      </button>
+      <button class="arrow arrow-right" id="charNext" aria-label="다음 캐릭터">
+        <svg viewBox="0 0 24 24"><path d="m9 4 8 8-8 8" /></svg>
+      </button>
+      <p class="char-name" id="charName">다이아 골든 햄스터</p>
+      <div class="traits" id="traits"></div>
     </section>
 
-    <!-- ========== 공용 오른쪽 패널 (1~10단계) ========== -->
-    <div class="panel step-panel" id="stepPanel">
-      <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
-      <h2 class="title" id="stepTitle"></h2>
-      <p class="sub" id="stepSub"></p>
-      <div class="panel-body" id="panelBody"></div>
-      <button class="btn btn-prev" id="prevBtn">이전</button>
-      <button class="btn btn-primary btn-next" id="nextBtn">다음 단계</button>
+    <!-- ========== 기록 단계 공통 상단 (진행바 · 질문 · 이전/다음) ========== -->
+    <div class="step-ui" id="stepUi">
+      <div class="progress" id="progress"></div>
+      <div class="question"><p id="stepTitle"></p></div>
+      <button class="nav nav-prev" id="prevBtn" aria-label="이전 단계">
+        <svg viewBox="0 0 60 60"><path d="M40 12v36L12 30z" /></svg>
+      </button>
+      <button class="nav nav-next" id="nextBtn" aria-label="다음 단계">
+        <svg viewBox="0 0 60 60"><path d="M20 12v36l28-18z" /></svg>
+      </button>
     </div>
+
+    <!-- 조작 가이드 -->
+    <div class="hint" id="hint"><span class="hint-tap"></span><span id="hintText"></span></div>
 
     <!-- ========== 로딩 ========== -->
     <section class="scene" data-scene="loading">
-      <div class="loading">
-        <img id="loadingChar" src="assets/char-hamster.png" alt="" />
-        <div class="loading-shadow"></div>
-        <p id="loadingText">피드백을 쓰고 있어요</p>
-        <div class="loading-dots"><span></span><span></span><span></span></div>
-      </div>
+      <div class="loading-shadow"></div>
+      <img class="loading-char" id="loadingChar" src="assets/load-hamster.png" alt="" />
+      <p class="loading-text" id="loadingText">다이아 골든 햄스터가 순간을 분석하고 있어요</p>
+      <div class="loading-dots"><span></span><span></span><span></span></div>
     </section>
 
     <!-- ========== 결과 ========== -->
     <section class="scene" data-scene="result">
-      <div class="feedback-bubble" id="feedbackBubble">
+      <img class="pedestal pedestal-result" id="resultPedestal" src="assets/ped-hamster.png" alt="" />
+      <img class="char-result" id="resultChar" src="assets/char-hamster.png" alt="" />
+      <div class="panel result-panel">
         <p class="feedback-from" id="feedbackFrom"></p>
         <p class="feedback-text" id="feedbackText"></p>
-      </div>
-      <img class="pedestal pedestal-result" id="resultPedestal" src="assets/pedestal-yellow.png" alt="" />
-      <img class="char-result" id="resultChar" src="assets/char-hamster.png" alt="" />
-
-      <div class="panel result-panel">
-        <h2 class="title">오늘의 순간이<br />기록됐어!</h2>
-        <p class="sub">부모님께 전하고 싶은 이 순간의 감정이에요.</p>
         <dl class="summary" id="summary"></dl>
-        <button class="btn btn-prev" id="resultPrev">이전</button>
-        <button class="btn btn-primary btn-next" id="restartBtn">처음으로</button>
+        <button class="btn btn-primary btn-home" id="homeBtn">처음으로</button>
       </div>
     </section>
+
+    <!-- ========== 기록 보기 ========== -->
+    <div class="modal" id="recordsModal" hidden>
+      <div class="modal-box">
+        <button class="modal-close" id="recordsClose" aria-label="닫기">
+          <svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5 5 19" /></svg>
+        </button>
+        <h2>지금까지 남긴 기록</h2>
+        <p class="modal-sub" id="recordsCount"></p>
+        <div class="records" id="recordsList"></div>
+      </div>
+    </div>
+
+    <!-- 소리 켜기/끄기 -->
+    <button class="sound-btn" id="soundBtn" aria-label="소리 끄기">
+      <svg viewBox="0 0 24 24" class="on"><path d="M4 9h4l5-4v14l-5-4H4z" /><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" /></svg>
+      <svg viewBox="0 0 24 24" class="off"><path d="M4 9h4l5-4v14l-5-4H4z" /><path d="m17 9 5 6M22 9l-5 6" /></svg>
+    </button>
   </div>
 
   <script src="script.js"></script>
