@@ -932,39 +932,29 @@ const MOOD_TAG = ['힘들었던', '서운했던', '평범한', '기분 좋은', 
 function intensityOf(juice) {
   return juice < 34 ? '은은하게' : juice < 67 ? '분명하게' : '아주 강하게';
 }
+// 그린 원 해석: 걸린 시간 → 그린 속도, 동그란 정도 → 마음의 모양
 function drawMindOf(d) {
-  if (!d) return '편안한';
-  const speed = d.seconds < 1.6 ? '에너지가 넘치는' : d.seconds > 4.5 ? '차분하게 생각하는' : '편안한 속도의';
-  const shape = d.round >= 85 ? '또렷하고 안정적인' : d.round >= 65 ? '부드럽게 흐르는' : '조금 흔들리는';
-  return `${speed}, ${shape}`;
+  if (!d) return { speed: '편안하게', shape: '편안한' };
+  const speed = d.seconds < 1.6 ? '힘차게' : d.seconds > 4.5 ? '차분하게' : '편안하게';
+  const shape = d.round >= 85 ? '안정적인' : d.round >= 65 ? '부드러운' : '조금 흔들리는';
+  return { speed, shape };
 }
 
 function buildAnalysis(s = state) {
   const emo = EMOTIONS[s.emotion].name;
   const d = s.draw || { round: 0, seconds: 0, size: 100 };
   const juice = Math.round(s.juice);
+  const mind = drawMindOf(d);
   return {
     rows: [
-      { step: '기분 바', input: `'${MOODS[s.mood].label}' 선택`, out: `오늘 감정의 바탕을 '${MOOD_BASE[s.mood]}' 상태로 잡았어요` },
-      { step: '순간', input: `${s.activity} · ${s.place} · ${s.who}`, out: `언제 어떤 상황이었는지 키워드로 정리했어요` },
-      { step: '감정 카드', input: `'${emo}' 카드`, out: `이번 순간의 핵심 감정으로 정했어요` },
-      { step: '잔 채우기', input: `${juice}% 채움`, out: `'${emo}' 감정을 ${intensityOf(juice)} 느꼈다고 봤어요` },
-      { step: '원 그리기', input: `동그란 정도 ${d.round}% · ${d.seconds}초`,
-        out: `${drawMindOf(d)} 마음으로 해석했어요` },
+      { step: '기분 바', input: `'${MOODS[s.mood].label}' 선택`, out: `감정의 바탕을 '${MOOD_BASE[s.mood]}' 상태로 봤어요` },
+      { step: '순간', input: `${s.activity} · ${s.place} · ${s.who}`, out: '어떤 상황이었는지 키워드로 정리했어요' },
+      { step: '감정 카드', input: `'${emo}' 카드`, out: '이번 순간의 핵심 감정으로 정했어요' },
+      { step: '잔 채우기', input: `${juice}% 채움`, out: `감정의 세기를 '${intensityOf(juice)}'로 봤어요` },
+      { step: '원 그리기', input: `동그란 정도 ${d.round}% · ${d.seconds}초`, out: `${mind.speed} 그린 ${mind.shape} 마음으로 봤어요` },
     ],
-    final: `${MOOD_BASE[s.mood]} 하루 속에서 <strong>'${emo}'</strong> 감정을 ${intensityOf(juice)} 느꼈고, ${drawMindOf(d).split(', ')[1]} 마음으로 기록했어요.`,
+    final: `${MOOD_BASE[s.mood]} 하루 속에서 <strong>'${emo}'</strong> 감정을 ${intensityOf(juice)} 느꼈고, ${mind.shape} 마음으로 기록했어요.`,
   };
-}
-
-// 헤드라인 아래 한 줄 피드백
-function buildLine(s = state) {
-  const emo = EMOTIONS[s.emotion].name;
-  const lines = [
-    `${s.place}에서의 ${emo} 순간, 소중하게 담아뒀어.`,
-    `${emo} 마음까지 솔직하게 꺼내줘서 고마워.`,
-    `오늘의 ${emo} 순간이 너에게 작은 힘이 되길 바라.`,
-  ];
-  return lines[(s.emotion + s.mood) % lines.length];
 }
 
 // 기록에 맞는 #키워드
@@ -996,7 +986,6 @@ function showResult() {
   from.textContent = `${c.name}의 피드백`;
   from.style.color = c.bubbleName;
 
-  $('#resultLine').textContent = buildLine();
   const analysis = buildAnalysis();
   $('#analysis').innerHTML = analysis.rows.map((r) => `
     <li><b>${r.step}</b><span class="in">${esc(r.input)}</span><span class="out">${esc(r.out)}</span></li>`).join('');
@@ -1023,11 +1012,28 @@ function showCard() {
   card.style.setProperty('--a1', a1);
   card.style.setProperty('--tag', tag);
   const [l1, l2, emoji] = lastRecord?.action || buildAction();
-  $('#cardAction').innerHTML = `<span class="grad">${esc(l1)}</span><br /><span class="grad">${esc(l2)}</span> ${emoji}`;
+  renderAction(`${l1} ${l2}`, emoji);
   $('#cardTags').innerHTML = (lastRecord?.tags || buildTags()).map((t) => `<li>${esc(t)}</li>`).join('');
   $('#cardChar').src = `assets/char-${c.id}.png`;
   showScene('card');
   Sound.whoosh();
+}
+
+// 행동 추천 문구: 캐릭터 영역 전까지만 쓰고 자연스럽게 줄바꿈.
+// 마지막 단어와 이모지는 같은 줄에 붙여 두고, 3줄을 넘으면 글자를 줄임
+function renderAction(text, emoji) {
+  const el = $('#cardAction');
+  const words = text.trim().split(/\s+/);
+  const last = words.pop();
+  el.innerHTML = `<span class="grad">${esc(words.join(' '))} </span><span class="tail"><span class="grad">${esc(last)}</span> ${emoji}</span>`;
+  let size = 67;
+  el.style.fontSize = `${size}px`;
+  el.style.lineHeight = `${size * 1.37}px`;
+  while (el.scrollHeight > size * 1.37 * 3 + 4 && size > 44) {
+    size -= 3;
+    el.style.fontSize = `${size}px`;
+    el.style.lineHeight = `${size * 1.37}px`;
+  }
 }
 
 $('#resultNext').addEventListener('click', () => {
