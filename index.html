@@ -20,7 +20,7 @@
         <img class="logo" src="assets/logo.png" alt="오늘우리" />
         <h1 class="start-title">부모님께 이 순간의<br />감정을 전해보자!</h1>
         <p class="start-sub">실제로 전해지진 않아요.</p>
-        <button class="btn btn-records" id="recordsBtn">기록보기</button>
+        <button class="btn btn-records" id="recordsBtn">지난 기록 보기</button>
         <button class="btn btn-primary btn-start" id="startBtn">시작하기</button>
       </div>
     </section>
@@ -58,7 +58,7 @@
 
     <!-- ========== 7. 잔 채우기 ========== -->
     <section class="scene" data-scene="juice">
-      <img class="table" src="assets/table.jpg" alt="" />
+      <img class="plate" src="assets/plate.png" alt="" />
       <div class="glass" id="glass">
         <svg class="juice" viewBox="0 0 416.316 624.569" preserveAspectRatio="none">
           <defs>
@@ -135,12 +135,28 @@
     <section class="scene" data-scene="result">
       <img class="pedestal pedestal-result" id="resultPedestal" src="assets/ped-hamster.png" alt="" />
       <img class="char-result" id="resultChar" src="assets/char-hamster.png" alt="" />
-      <div class="panel result-panel">
+      <div class="feedback-bubble">
         <p class="feedback-from" id="feedbackFrom"></p>
         <p class="feedback-text" id="feedbackText"></p>
-        <dl class="summary" id="summary"></dl>
-        <button class="btn btn-primary btn-home" id="homeBtn">처음으로</button>
       </div>
+      <div class="panel result-panel">
+        <h2 class="result-title">오늘의 순간이<br />기록됐어!</h2>
+        <p class="result-line" id="resultLine"></p>
+        <p class="analysis-head">이렇게 분석했어</p>
+        <ol class="analysis" id="analysis"></ol>
+        <p class="analysis-final" id="analysisFinal"></p>
+        <button class="btn btn-primary btn-home" id="resultNext">다음</button>
+      </div>
+    </section>
+
+    <!-- ========== 마지막 기록 카드 ========== -->
+    <section class="scene" data-scene="card">
+      <div class="moment-card" id="momentCard">
+        <p class="card-action" id="cardAction"></p>
+        <ul class="card-tags" id="cardTags"></ul>
+        <img class="card-char" id="cardChar" src="assets/char-hamster.png" alt="" />
+      </div>
+      <button class="btn btn-primary btn-card-home" id="homeBtn">처음으로</button>
     </section>
 
     <!-- ========== 기록 보기 ========== -->

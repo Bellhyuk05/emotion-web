@@ -229,13 +229,18 @@ const EMOTIONS = [
   { name: '여유로운', img: 'card-relaxed.png', pill: '#74bfd6' },
 ];
 
-// bg: 로딩·피드백 화면 배경색
+// bg: 로딩·피드백 화면 배경색, card: 마지막 기록 카드 색 [바탕, 제목 위, 제목 아래, 태그]
 const CHARACTERS = [
-  { id: 'hamster', name: '다이아 골든 햄스터', traits: [3, 4, 1], grad: ['#bb9b35', '#554618'], dot: '#ffa800', bg: ['#ffe489', '#fff2c7', '#fffaf0'] },
-  { id: 'bird', name: '사과 코끼리', traits: [5, 2, 3], grad: ['#5d8fd6', '#2a4a80'], dot: '#5b9be6', bg: ['#a7d0f5', '#d6e9fb', '#f3f9fe'] },
-  { id: 'sprout', name: '새싹 뭉실양', traits: [4, 3, 2], grad: ['#86ad4f', '#3f5527'], dot: '#8fd05a', bg: ['#c3e7a3', '#e3f4d4', '#f6fcf1'] },
-  { id: 'pig', name: '소세지 돼지', traits: [2, 1, 5], grad: ['#e47d9d', '#8a3d55'], dot: '#f58fb3', bg: ['#ffbfd3', '#ffe0ea', '#fff5f8'] },
-  { id: 'lion', name: '초코별 사자', traits: [4, 2, 4], grad: ['#8a6656', '#3d2a22'], dot: '#7b5444', bg: ['#d6b39c', '#ecd9cb', '#faf3ee'] },
+  { id: 'hamster', name: '다이아 골든 햄스터', traits: [3, 4, 1], grad: ['#bb9b35', '#554618'], dot: '#ffa800', bg: ['#ffe489', '#fff2c7', '#fffaf0'],
+    card: ['#ffaa21', '#907856', '#c88a33', '#ffeec9'], bubbleName: '#857948' },
+  { id: 'bird', name: '사과 코끼리', traits: [5, 2, 3], grad: ['#5d8fd6', '#2a4a80'], dot: '#5b9be6', bg: ['#a7d0f5', '#d6e9fb', '#f3f9fe'],
+    card: ['#62b4f0', '#5b6d82', '#3d82c4', '#dff0ff'], bubbleName: '#3f6a9c' },
+  { id: 'sprout', name: '새싹 뭉실양', traits: [4, 3, 2], grad: ['#86ad4f', '#3f5527'], dot: '#8fd05a', bg: ['#c3e7a3', '#e3f4d4', '#f6fcf1'],
+    card: ['#8fd15e', '#69774f', '#5e9a33', '#ecf9dc'], bubbleName: '#56733a' },
+  { id: 'pig', name: '소세지 돼지', traits: [2, 1, 5], grad: ['#e47d9d', '#8a3d55'], dot: '#f58fb3', bg: ['#ffbfd3', '#ffe0ea', '#fff5f8'],
+    card: ['#ff92b6', '#86606c', '#d8587f', '#ffe6ee'], bubbleName: '#a24e6a' },
+  { id: 'lion', name: '초코별 사자', traits: [4, 2, 4], grad: ['#8a6656', '#3d2a22'], dot: '#7b5444', bg: ['#d6b39c', '#ecd9cb', '#faf3ee'],
+    card: ['#a97f6b', '#7d6457', '#a0634a', '#f5e6dc'], bubbleName: '#6e5145' },
 ];
 
 const BUBBLES = [
@@ -258,6 +263,7 @@ function freshState() {
     emotion: 3,
     juice: 0,
     drawn: false,
+    draw: null, // 원 그리기 분석값 { round, seconds, size }
     character: 0,
   };
 }
@@ -279,7 +285,7 @@ const STEPS = [
   { id: 'emotion', scene: 'cards', title: '어떤 감정이 지나갔는지 궁금해!',
     hint: { text: '카드를 좌우로 끌어서 돌리고, 마음에 맞는 카드를 골라봐', top: 985 } },
   { id: 'juice', scene: 'juice', title: '네가 느낀 감정만큼 잔을 눌러 채워줘!',
-    hint: { text: '잔을 꾹 누르고 있으면 채워져', top: 335, left: 600 }, target: '#glass' },
+    hint: { text: '잔을 꾹 누르고 있으면 채워져', top: 330, left: 668 }, target: '#glass' },
   { id: 'draw', scene: 'draw', title: '순간을 떠올리며 원을 따라 그려보자',
     hint: { text: '움직이는 점을 따라 마우스로 원을 그려봐', top: 985 } },
   { id: 'character', scene: 'character', title: '결과를 함께할 캐릭터를 골라봐!',
@@ -495,10 +501,12 @@ function renderChips(key) {
     chip.textContent = label;
     chip.style.animationDelay = `${n * 0.04}s`;
     chip.addEventListener('click', () => {
-      state[key] = state[key] === label ? null : label;
+      if (advancing) return;
+      state[key] = label;
       Sound.select();
       list.querySelectorAll('.chip').forEach((c) => c.classList.toggle('selected', c.textContent === state[key]));
       markGuided();
+      autoAdvance();
     });
     list.appendChild(chip);
   });
@@ -528,6 +536,9 @@ function renderChips(key) {
         state[key] = v;
         Sound.select();
         markGuided();
+        renderChips(key);
+        autoAdvance();
+        return;
       }
       renderChips(key);
       updateNext();
@@ -540,6 +551,17 @@ function renderChips(key) {
   });
   list.appendChild(add);
   if (!guided[key] && hint.classList.contains('show')) list.classList.add('nudge');
+}
+
+// 선택하면 선택 표시를 잠깐 보여준 뒤 다음 단계로 넘어감
+let advancing = false;
+function autoAdvance() {
+  advancing = true;
+  const from = stepIndex;
+  setTimeout(() => {
+    advancing = false;
+    if (stepIndex === from) goStep(from + 1);
+  }, 450);
 }
 
 /* =========================================================
@@ -717,6 +739,17 @@ let drawing = false;
 let bins = new Set();
 let lastPt = null;
 let strokeTick = 0;
+let radii = [];
+let strokeStart = 0;
+
+// 그린 원 분석: 얼마나 동그란지(반지름이 고른지), 걸린 시간, 크기
+function analyzeCircle() {
+  const mean = radii.reduce((a, b) => a + b, 0) / radii.length;
+  const sd = Math.sqrt(radii.reduce((a, r) => a + (r - mean) ** 2, 0) / radii.length);
+  const round = Math.max(0, Math.min(100, Math.round(100 - (sd / mean) * 250)));
+  const seconds = Math.round((performance.now() - strokeStart) / 100) / 10;
+  return { round, seconds, size: Math.round((mean / CIRCLE.r) * 100) };
+}
 
 function resetDraw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -730,6 +763,8 @@ canvas.addEventListener('pointerdown', (e) => {
   capture(canvas, e);
   drawing = true;
   bins = new Set();
+  radii = [];
+  strokeStart = performance.now();
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   lastPt = toStage(e, canvas);
   guide.classList.add('drawing');
@@ -752,6 +787,7 @@ canvas.addEventListener('pointermove', (e) => {
   if (++strokeTick % 6 === 0) Sound.tone(700 + bins.size * 25, 0.05, { vol: 0.06, type: 'triangle' });
 
   const dist = Math.hypot(p.x - CIRCLE.x, p.y - CIRCLE.y);
+  radii.push(dist);
   if (Math.abs(dist - CIRCLE.r) < 75) {
     const ang = Math.atan2(p.y - CIRCLE.y, p.x - CIRCLE.x);
     bins.add(Math.floor(((ang + Math.PI) / (Math.PI * 2)) * 36) % 36);
@@ -763,6 +799,7 @@ canvas.addEventListener('pointerup', () => {
   guide.classList.remove('drawing');
   if (bins.size >= 30) {
     state.drawn = true;
+    state.draw = analyzeCircle();
     Sound.success();
     canvas.style.transition = 'opacity 0.4s';
     canvas.style.opacity = 0;
@@ -825,6 +862,7 @@ $('#charNext').addEventListener('click', () => { Sound.swoosh(); applyCharacter(
    ========================================================= */
 function startLoading() {
   const c = CHARACTERS[state.character];
+  stepIndex = STEPS.length; // 기록 단계 밖 (가이드가 다시 뜨지 않도록)
   stepUi.classList.remove('show');
   hideHint();
   setPalette(c.bg);
@@ -887,26 +925,116 @@ function buildFeedback(s = state) {
   return T[c.id].join(' ');
 }
 
+/* ---------- 기록 분석: 입력 → 분석 → 최종 기록 ---------- */
+const MOOD_BASE = ['많이 지친', '조금 가라앉은', '평온한', '밝은', '아주 밝은'];
+const MOOD_TAG = ['힘들었던', '서운했던', '평범한', '기분 좋은', '행복한'];
+
+function intensityOf(juice) {
+  return juice < 34 ? '은은하게' : juice < 67 ? '분명하게' : '아주 강하게';
+}
+function drawMindOf(d) {
+  if (!d) return '편안한';
+  const speed = d.seconds < 1.6 ? '에너지가 넘치는' : d.seconds > 4.5 ? '차분하게 생각하는' : '편안한 속도의';
+  const shape = d.round >= 85 ? '또렷하고 안정적인' : d.round >= 65 ? '부드럽게 흐르는' : '조금 흔들리는';
+  return `${speed}, ${shape}`;
+}
+
+function buildAnalysis(s = state) {
+  const emo = EMOTIONS[s.emotion].name;
+  const d = s.draw || { round: 0, seconds: 0, size: 100 };
+  const juice = Math.round(s.juice);
+  return {
+    rows: [
+      { step: '기분 바', input: `'${MOODS[s.mood].label}' 선택`, out: `오늘 감정의 바탕을 '${MOOD_BASE[s.mood]}' 상태로 잡았어요` },
+      { step: '순간', input: `${s.activity} · ${s.place} · ${s.who}`, out: `언제 어떤 상황이었는지 키워드로 정리했어요` },
+      { step: '감정 카드', input: `'${emo}' 카드`, out: `이번 순간의 핵심 감정으로 정했어요` },
+      { step: '잔 채우기', input: `${juice}% 채움`, out: `'${emo}' 감정을 ${intensityOf(juice)} 느꼈다고 봤어요` },
+      { step: '원 그리기', input: `동그란 정도 ${d.round}% · ${d.seconds}초`,
+        out: `${drawMindOf(d)} 마음으로 해석했어요` },
+    ],
+    final: `${MOOD_BASE[s.mood]} 하루 속에서 <strong>'${emo}'</strong> 감정을 ${intensityOf(juice)} 느꼈고, ${drawMindOf(d).split(', ')[1]} 마음으로 기록했어요.`,
+  };
+}
+
+// 헤드라인 아래 한 줄 피드백
+function buildLine(s = state) {
+  const emo = EMOTIONS[s.emotion].name;
+  const lines = [
+    `${s.place}에서의 ${emo} 순간, 소중하게 담아뒀어.`,
+    `${emo} 마음까지 솔직하게 꺼내줘서 고마워.`,
+    `오늘의 ${emo} 순간이 너에게 작은 힘이 되길 바라.`,
+  ];
+  return lines[(s.emotion + s.mood) % lines.length];
+}
+
+// 기록에 맞는 #키워드
+function buildTags(s = state) {
+  const who = s.who === '혼자' ? '혼자만의' : s.who === '모르는 사람' ? '낯선 사람과의' : `${s.who}${josa(s.who, '과', '와')}의`;
+  return [`# ${EMOTIONS[s.emotion].name}`, `# ${who} ${s.activity}`, `# ${MOOD_TAG[s.mood]} 순간`];
+}
+
+// 짧은 행동 추천 + 이모지 (두 줄)
+function buildAction(s = state) {
+  const parent = s.who === '엄마' || s.who === '아빠';
+  const sets = {
+    low: [['오늘은 부모님께', '힘들었다고 말해보자', '🫂'], ['따뜻한 물 한 잔 마시고', '푹 쉬어 보자', '🍵']],
+    mid: [['가끔은 부모님께 먼저', '안부를 물어보자!', '💗'], ['저녁 식탁에서 오늘', '있었던 일을 나눠보자', '🍚']],
+    high: [['이 기분 그대로', '부모님께 먼저 인사해보자!', '🖐'], ['오늘의 좋은 순간을', '부모님께 자랑해보자!', '✨']],
+  };
+  if (parent && s.mood >= 2) return [`${s.who}에게 오늘`, '고맙다고 말해보자!', '💐'];
+  const tone = s.mood <= 1 ? 'low' : s.mood === 2 ? 'mid' : 'high';
+  return sets[tone][(s.emotion + s.activity.length) % 2];
+}
+
+let lastRecord = null;
+
 function showResult() {
   const c = CHARACTERS[state.character];
   $('#resultChar').src = `assets/char-${c.id}.png`;
   $('#resultPedestal').src = `assets/ped-${c.id}.png`;
   const from = $('#feedbackFrom');
   from.textContent = `${c.name}의 피드백`;
-  from.style.color = c.grad[1];
+  from.style.color = c.bubbleName;
 
-  $('#summary').innerHTML = `
-    <dt>기분</dt><dd>${MOODS[state.mood].label}</dd>
-    <dt>순간</dt><dd class="mini-tags"><span>${esc(state.activity)}</span><span>${esc(state.place)}</span><span>${esc(state.who)}</span></dd>
-    <dt>감정</dt><dd>${EMOTIONS[state.emotion].name}</dd>
-    <dt>감정 크기</dt><dd><div class="bar"><i style="width:${state.juice}%"></i></div></dd>`;
+  $('#resultLine').textContent = buildLine();
+  const analysis = buildAnalysis();
+  $('#analysis').innerHTML = analysis.rows.map((r) => `
+    <li><b>${r.step}</b><span class="in">${esc(r.input)}</span><span class="out">${esc(r.out)}</span></li>`).join('');
+  const final = $('#analysisFinal');
+  final.innerHTML = `최종 기록 · ${analysis.final}`;
+  final.style.setProperty('--accent', c.card[2]);
 
   showScene('result');
   Sound.success();
   const feedback = buildFeedback();
   typeText($('#feedbackText'), feedback);
-  saveRecord(feedback);
+  lastRecord = saveRecord(feedback);
 }
+
+// 마지막 기록 카드
+function showCard() {
+  const c = CHARACTERS[state.character];
+  const card = $('#momentCard');
+  const [base, a0, a1, tag] = c.card;
+  card.style.setProperty('--card', base);
+  card.style.setProperty('--card-glow', `${base}40`);
+  card.style.setProperty('--card-line', `${tag}`);
+  card.style.setProperty('--a0', a0);
+  card.style.setProperty('--a1', a1);
+  card.style.setProperty('--tag', tag);
+  const [l1, l2, emoji] = lastRecord?.action || buildAction();
+  $('#cardAction').innerHTML = `<span class="grad">${esc(l1)}</span><br /><span class="grad">${esc(l2)}</span> ${emoji}`;
+  $('#cardTags').innerHTML = (lastRecord?.tags || buildTags()).map((t) => `<li>${esc(t)}</li>`).join('');
+  $('#cardChar').src = `assets/char-${c.id}.png`;
+  showScene('card');
+  Sound.whoosh();
+}
+
+$('#resultNext').addEventListener('click', () => {
+  clearInterval(typeTimer);
+  Sound.click();
+  showCard();
+});
 
 function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -940,7 +1068,7 @@ const RECORDS_KEY = 'oneuluri-records';
 
 function saveRecord(feedback) {
   const records = store.get(RECORDS_KEY, []);
-  records.unshift({
+  const record = {
     date: new Date().toISOString(),
     mood: state.mood,
     activity: state.activity,
@@ -949,9 +1077,14 @@ function saveRecord(feedback) {
     emotion: state.emotion,
     juice: Math.round(state.juice),
     character: state.character,
+    draw: state.draw,
     feedback,
-  });
+    tags: buildTags(),
+    action: buildAction(),
+  };
+  records.unshift(record);
   store.set(RECORDS_KEY, records.slice(0, 60));
+  return record;
 }
 
 function formatDate(iso) {
@@ -975,7 +1108,7 @@ function openRecords() {
             <img src="assets/char-${c.id}.png" alt="${c.name}" />
             <p class="r-date">${formatDate(r.date)}</p>
             <p class="r-main">${MOODS[r.mood]?.label ?? ''} · ${EMOTIONS[r.emotion]?.name ?? ''}</p>
-            <p class="r-tags">${esc(r.activity)} · ${esc(r.place)} · ${esc(r.who)} · ${r.juice}%</p>
+            <p class="r-tags">${r.tags ? r.tags.map(esc).join(' ') : `${esc(r.activity)} · ${esc(r.place)} · ${esc(r.who)}`} · ${r.juice}%</p>
             <p class="r-text">${esc(r.feedback)}</p>
           </article>`;
       }).join('')
